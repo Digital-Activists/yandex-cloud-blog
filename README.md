@@ -4,19 +4,34 @@
 
 ## Обзор
 
+### Terraform
+
 ```txt
- terraform
-├── 󱁢 application.tf    - Конфигурация виртуальных машин
-├── 󱁢 database.tf       - Конфигурация базы данных
-├── 󱁢 main.tf
-├── 󱁢 net.tf            - Конфигурация сети
-├── 󱁢 storage.tf        - Конфигурация Object Storage
-└── 󱁢 variables.tf      - Используемые переменные
+terraform/
+├── application.tf    - Конфигурация виртуальных машин
+├── database.tf       - Конфигурация базы данных
+├── main.tf
+├── net.tf            - Конфигурация сети
+├── storage.tf        - Конфигурация Object Storage
+└── variables.tf      - Используемые переменные
 ```
 
-## Terraform
+## Развертывание
 
-### Развертывание
+1. Создайте registry:
+
+```sh
+make yc-create-registry
+```
+
+2. Загрузите образ в registry:
+
+```sh
+chmod +x ./scripts/build_and_push.sh
+./scripts/build_and_push.sh <repository> <registry> [branch]
+```
+
+3. Запустите terraform:
 
 ```sh
 cd terraform
@@ -28,7 +43,7 @@ terraform plan -var-file=<my-variables.tfvars>
 terraform apply -var-file=<my-variables.tfvars>
 ```
 
-### Удаление
+## Удаление
 
 ```sh
 terraform destroy -var-file=<my-variables.tfvars>
