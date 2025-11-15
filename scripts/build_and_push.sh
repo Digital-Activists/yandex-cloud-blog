@@ -29,7 +29,7 @@ if [ "$#" -lt 2 ]; then
 fi
 
 GIT_REPO_URL="$1"
-IMAGE_NAME="$2"
+IMAGE_URL="${2:-app}"
 GIT_BRANCH="${3:-main}"  # по умолчанию main
 
 # --- Устанавливаем trap на выход (включая ошибки) ---
@@ -71,13 +71,13 @@ fi
 
 # --- Сборка Docker-образа ---
 echo "🔨 Собираю Docker-образ"
-docker build -t "$IMAGE_NAME" .
+docker build -t "$IMAGE_URL" .
 
 # --- Пуш в Container Registry ---
-echo "📤 Пушу образ в: $IMAGE_NAME"
-docker push "$IMAGE_NAME"
+echo "📤 Пушу образ в: $IMAGE_URL"
+docker push "$IMAGE_URL"
 
-echo "✅ Образ успешно собран и загружен: $IMAGE_NAME"
+echo "✅ Образ успешно собран и загружен: $IMAGE_URL"
 
 # trap cleanup EXIT выполнит очистку автоматически
 echo "✅ Скрипт завершён успешно."

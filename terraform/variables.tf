@@ -11,7 +11,11 @@ variable "zone" {
   type        = string
   default     = "ru-central1-a"
 }
-variable "application_image_id" {
-  description = "Image with Application"
+variable "container_registry_id" {
+  type = string
+}
+variable "docker_image_name" {
+  description = "Name of the image with the application"
   type        = string
+  default     = "app"
 }
