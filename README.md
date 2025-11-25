@@ -48,3 +48,27 @@ terraform apply -var-file=<my-variables.tfvars>
 ```sh
 terraform destroy -var-file=<my-variables.tfvars>
 ```
+
+## Tips and Tricks
+
+### Cloud-init
+
+#### Чтобы быстро понять, завершился ли cloud-init успешно:
+
+```sh
+cloud-init status --long
+```
+
+#### Основные логи
+
+Полный лог выполнения:
+
+```sh
+cat /var/log/cloud-init.log
+```
+
+Вывод команд из runcmd и bootcmd:
+
+```sh
+cat /var/log/cloud-init-output.log
+```
