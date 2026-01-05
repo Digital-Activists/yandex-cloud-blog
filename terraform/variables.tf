@@ -1,3 +1,13 @@
+variable "token" {
+  description = "Token полученный для сервисного аккаунта"
+  type        = string
+}
+variable "ssh_key_pub_path" {
+  type        = string
+  description = "Path to the public part of SSH-key"
+  default     = "~/.ssh/id_ed25519.pub"
+}
+
 variable "cloud_id" {
   description = "Cloud ID"
   type        = string
@@ -12,12 +22,25 @@ variable "zone" {
   default     = "ru-central1-a"
 }
 
+variable "project_name" {
+  type        = string
+  default     = "blogicum"
+}
 variable "docker_image_name" {
   description = "Name of the image with the application"
   type        = string
   default     = "app"
 }
-variable "vm_image_id" {
-  type        = string
-  description = "ID образа ubuntu для виртуальной машины"
+
+variable "db_user" {
+  type    = string
+  default = "user"
+}
+variable "db_name" {
+  type    = string
+  default = "blogicum"
+}
+variable "db_password" {
+  type    = string
+  default = "password"
 }
