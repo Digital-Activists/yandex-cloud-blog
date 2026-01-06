@@ -38,29 +38,28 @@ resource "yandex_compute_instance" "db" {
 #cloud-config
 package_update: true
 packages:
-    - docker.io
+  - docker.io
 
 runcmd:
-    - systemctl start docker
-    - systemctl enable docker
+  - systemctl start docker
+  - systemctl enable docker
 
-    # Аутентификация в registry от имени сервисного аккаунта
-    - curl --header Metadata-Flavor:Google 169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | cut -f1 -d',' | cut -f2 -d':' | tr -d '"' | docker login --username iam --password-stdin cr.yandex
+  # Аутентификация в registry от имени сервисного аккаунта
+  - curl --header Metadata-Flavor:Google 169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | cut -f1 -d',' | cut -f2 -d':' | tr -d '"' | docker login --username iam --password-stdin cr.yandex
 
-    # Создание директории для данных PostgreSQL
-    - mkdir -p /var/lib/postgres-data
+  # Создание директории для данных PostgreSQL
+  - mkdir -p /var/lib/postgres-data
 
-    # Запуск PostgreSQL в фоне
-    - |
-        docker run -d \
-        --name ${var.project_name}-postgres \
-        --restart=always \
-        -e POSTGRES_DB=${var.db_name} \
-        -e POSTGRES_USER=${var.db_user} \
-        -e POSTGRES_PASSWORD=${var.db_password} \
-        -v /var/lib/postgres-data:/var/lib/postgresql/data \
-        -p 5432:5432 \
-        postgres:16
-    EOF
+  # Запуск PostgreSQL в фоне
+  - | docker run -d \
+      --name ${var.project_name}-postgres \
+      --restart=always \
+      -e POSTGRES_DB=${var.db_name} \
+      -e POSTGRES_USER=${var.db_user} \
+      -e POSTGRES_PASSWORD=${var.db_password} \
+      -v /var/lib/postgres-data:/var/lib/postgresql/data \
+      -p 5432:5432 \
+      postgres:16
+EOF
   }
 }
