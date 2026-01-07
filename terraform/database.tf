@@ -6,12 +6,17 @@ resource "yandex_resourcemanager_folder_iam_member" "db_cr_puller" {
   folder_id = var.folder_id
   role      = "container-registry.images.puller"
   member    = "serviceAccount:${yandex_iam_service_account.db.id}"
+
+  depends_on = [yandex_iam_service_account.db]
 }
 
 resource "yandex_compute_instance" "db" {
-  name        = "${var.project_name}-db"
-  platform_id = "standard-v3"
-  zone        = var.zone
+  name               = "${var.project_name}-db"
+  platform_id        = "standard-v3"
+  zone               = var.zone
+  service_account_id = yandex_iam_service_account.db.id
+
+  depends_on = [yandex_resourcemanager_folder_iam_member.db_cr_puller]
 
   resources {
     cores  = 2
@@ -19,8 +24,8 @@ resource "yandex_compute_instance" "db" {
   }
 
   network_interface {
-    subnet_id = yandex_vpc_subnet.subnet-1.id
-    nat       = true
+    subnet_id = yandex_vpc_subnet.subnet-a.id
+    nat       = true // TODO: Убрать после завершения работы над проектом
   }
 
   boot_disk {
@@ -29,8 +34,6 @@ resource "yandex_compute_instance" "db" {
       size     = 20
     }
   }
-
-  service_account_id = yandex_iam_service_account.db.id
 
   metadata = {
     ssh-keys  = "ubuntu:${file(var.ssh_key_pub_path)}"

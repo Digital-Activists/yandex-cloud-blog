@@ -23,13 +23,12 @@ variable "zone" {
 }
 
 variable "project_name" {
-  type        = string
-  default     = "blogicum"
+  type    = string
+  default = "blogicum"
 }
-variable "docker_image_name" {
-  description = "Name of the image with the application"
+variable "app_image_url" {
+  description = "URL to app image in from container registry"
   type        = string
-  default     = "app"
 }
 
 variable "db_user" {

@@ -1,11 +1,12 @@
-yc-create-registry:
-	yc container registry create --name my-registry
-
-yc-delete-registry:
-	yc container registry delete --name my-registry
-
-REGISTRY_NAME := django-app
 FOLDER_ID := $(shell yc config get folder-id 2>/dev/null)
+REGISTRY_NAME := blogicum
+REGISTRY_ID := $(shell yc container registry get $(REGISTRY_NAME) | awk '/^id:/ {print $$2}')
+
+create-registry:
+	yc container registry create --name $(REGISTRY_NAME)
+
+delete-registry: clean-registry
+	yc container registry delete --name $(REGISTRY_NAME)
 
 .PHONY: clean-registry destroy
 
@@ -31,15 +32,25 @@ clean-registry:
 			echo "  - Удаляю $$img"; \
 			yc container image delete "$$img" --async || echo "  ⚠️ Не удалось удалить $$img"; \
 		done; \
+		sleep 30; \
 	fi
 
-# Выполняет очистку и затем terraform destroy
-destroy: clean-registry
-	@echo "🔨 Запуск terraform destroy..."
-	terraform -chdir=terraform destroy -auto-approve -var-file=variables.tfvars
+destroy:
+	terraform -chdir=terraform destroy \
+		-var="token=$(YC_TOKEN)" \
+		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/app:latest" \
+		-var-file=variables.tfvars \
+		-auto-approve
 
 plan:
-	terraform -chdir=terraform plan -var-file=variables.tfvars -auto-approve
+	terraform -chdir=terraform plan \
+		-var="token=$(YC_TOKEN)" \
+		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/app:latest" \
+		-var-file=variables.tfvars
 
 apply:
-	terraform -chdir=terraform apply -var-file=variables.tfvars -auto-approve
+	terraform -chdir=terraform apply \
+		-var="token=$(YC_TOKEN)" \
+		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/app:latest" \
+		-var-file=variables.tfvars \
+		-auto-approve
