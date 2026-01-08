@@ -1,6 +1,9 @@
-FOLDER_ID := $(shell yc config get folder-id 2>/dev/null)
 REGISTRY_NAME := blogicum
+IMAGE_NAME := app
+
 REGISTRY_ID := $(shell yc container registry get $(REGISTRY_NAME) | awk '/^id:/ {print $$2}')
+FOLDER_ID := $(shell yc config get folder-id)
+CLOUD_ID := $(shell yc config get cloud-id)
 
 create-registry:
 	yc container registry create --name $(REGISTRY_NAME)
@@ -38,19 +41,28 @@ clean-registry:
 destroy:
 	terraform -chdir=terraform destroy \
 		-var="token=$(YC_TOKEN)" \
-		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/app:latest" \
+		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/${IMAGE_NAME}:latest" \
+		-var="folder_id=$(FOLDER_ID)" \
+		-var="cloud_id=$(CLOUD_ID)" \
 		-var-file=variables.tfvars \
 		-auto-approve
 
 plan:
 	terraform -chdir=terraform plan \
 		-var="token=$(YC_TOKEN)" \
-		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/app:latest" \
+		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/${IMAGE_NAME}:latest" \
+		-var="folder_id=$(FOLDER_ID)" \
+		-var="cloud_id=$(CLOUD_ID)" \
 		-var-file=variables.tfvars
 
 apply:
 	terraform -chdir=terraform apply \
 		-var="token=$(YC_TOKEN)" \
-		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/app:latest" \
+		-var="app_image_url=cr.yandex/$(REGISTRY_ID)/${IMAGE_NAME}:latest" \
+		-var="folder_id=$(FOLDER_ID)" \
+		-var="cloud_id=$(CLOUD_ID)" \
 		-var-file=variables.tfvars \
 		-auto-approve
+
+clone-build-push:
+	./scripts/build_and_push.sh git@github.com:Digital-Activists/yandex-cloud-blog-application.git cr.yandex/${REGISTRY_ID}/${IMAGE_NAME}:latest

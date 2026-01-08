@@ -18,35 +18,39 @@ terraform/
 
 ## Развертывание
 
-1. Создайте registry:
+1. Создайте токен:
 
 ```sh
-make yc-create-registry
+export YC_TOKEN=$(yc iam create-token --impersonate-service-account-id <id_сервисного_аккаунта>)
 ```
 
-2. Загрузите образ в registry:
+2. Создайте registry:
 
 ```sh
-chmod +x ./scripts/build_and_push.sh
-./scripts/build_and_push.sh <repository> <registry> [branch]
+make create-registry
 ```
 
-3. Запустите terraform:
+3. Загрузите образ в registry:
 
 ```sh
-cd terraform
+make clone-build-push
+```
 
-terraform init
+4. Запустите terraform:
 
-terraform plan -var-file=<my-variables.tfvars>
+```sh
+terraform -chdir=terraform init # init нужно выполнить единожды
 
-terraform apply -var-file=<my-variables.tfvars>
+make apply
 ```
 
 ## Удаление
 
+*Перед вызовом destroy вручную удалите все папки и файлы из Object Storage бакета.*
+
 ```sh
-terraform destroy -var-file=<my-variables.tfvars>
+make destroy
+make delete-registry
 ```
 
 ## Tips and Tricks

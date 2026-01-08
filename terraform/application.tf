@@ -137,16 +137,16 @@ runcmd:
 
   # Запуск Django-контейнера после успешного pull
   - | 
-      docker run -d
-      --name ${var.project_name}
-      --restart=always
-      -e DJANGO_DEBUG=False
-      -e AWS_ACCESS_KEY_ID=${yandex_iam_service_account_static_access_key.storage-static-key.access_key}
-      -e AWS_SECRET_ACCESS_KEY=${yandex_iam_service_account_static_access_key.storage-static-key.secret_key}
-      -e AWS_STORAGE_BUCKET_NAME=${yandex_storage_bucket.bucket.bucket}
-      -e AWS_S3_ENDPOINT_URL="https://storage.yandexcloud.net"
-      -e DATABASE_URL="postgres://${var.db_user}:${var.db_password}@${yandex_compute_instance.db.network_interface.0.ip_address}:5432/${var.db_name}?sslmode=disable"
-      -p 8000:8000
+      docker run -d \
+      --name ${var.project_name} \
+      --restart=always \
+      -e DJANGO_DEBUG=False \
+      -e AWS_ACCESS_KEY_ID=${yandex_iam_service_account_static_access_key.storage-static-key.access_key} \
+      -e AWS_SECRET_ACCESS_KEY=${yandex_iam_service_account_static_access_key.storage-static-key.secret_key} \
+      -e AWS_STORAGE_BUCKET_NAME=${yandex_storage_bucket.bucket.bucket} \
+      -e AWS_S3_ENDPOINT_URL="https://storage.yandexcloud.net" \
+      -e DATABASE_URL="postgres://${var.db_user}:${var.db_password}@${yandex_compute_instance.db.network_interface.0.ip_address}:5432/${var.db_name}?sslmode=disable" \
+      -p 8000:8000 \
       ${var.app_image_url}
 EOF
     }

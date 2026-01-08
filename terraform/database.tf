@@ -54,7 +54,8 @@ runcmd:
   - mkdir -p /var/lib/postgres-data
 
   # Запуск PostgreSQL в фоне
-  - | docker run -d \
+  - |
+      docker run -d \
       --name ${var.project_name}-postgres \
       --restart=always \
       -e POSTGRES_DB=${var.db_name} \
