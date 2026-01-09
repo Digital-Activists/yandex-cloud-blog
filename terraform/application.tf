@@ -35,6 +35,11 @@ resource "yandex_resourcemanager_folder_iam_member" "app_vm_storage_editor" {
   depends_on = [yandex_iam_service_account.app_vm]
 }
 
+resource "yandex_resourcemanager_folder_iam_member" "app_vm_monitoring_editor" {
+  folder_id = var.folder_id
+  role      = "monitoring.editor"
+  member    = "serviceAccount:${yandex_iam_service_account.app_vm.id}"
+}
 
 
 resource "yandex_compute_instance_group" "app_group" {
@@ -119,6 +124,60 @@ package_update: true
 packages:
   - docker.io
 
+write_files:
+  - path: /etc/yc/unified_agent/${var.project_name}-config.yml
+    permissions: '0644'
+    content: |
+      status:
+        port: "16241"
+
+      storages:
+        - name: main
+          plugin: fs
+          config:
+            directory: /var/lib/yandex/unified_agent/main
+            max_partition_size: 100mb
+            max_segment_size: 10mb
+
+      channels:
+        - name: cloud_monitoring
+          channel:
+            pipe:
+              - storage_ref:
+                  name: main
+            output:
+              plugin: yc_metrics
+              config:
+                folder_id: "${var.folder_id}"
+                iam:
+                  cloud_meta: {}
+
+      routes:
+        - input:
+            plugin: metrics_pull
+            config:
+              url: http://127.0.0.1:8000/metrics
+              metric_name_label: ${var.project_name}_name
+              format:
+                prometheus: {}
+              namespace: app
+          channel:
+            channel_ref:
+              name: cloud_monitoring
+
+        - input:
+            plugin: agent_metrics
+            config:
+              namespace: ua
+          channel:
+            pipe:
+              - filter:
+                  plugin: filter_metrics
+                  config:
+                    match: "{scope=health}"
+            channel_ref:
+              name: cloud_monitoring
+
 runcmd:
   - systemctl start docker
   - systemctl enable docker
@@ -148,6 +207,18 @@ runcmd:
       -e DATABASE_URL="postgres://${var.db_user}:${var.db_password}@${yandex_compute_instance.db.network_interface.0.ip_address}:5432/${var.db_name}?sslmode=disable" \
       -p 8000:8000 \
       ${var.app_image_url}
+  
+  # Запуск Yandex Unified Agent
+  - |
+      docker run \
+      -p 16241:16241 -it --detach --uts=host \
+      --name=ua \
+      --network=host \
+      -v /proc:/ua_proc \
+      -v /etc/yc/unified_agent/${var.project_name}-config.yml:/etc/yandex/unified_agent/conf.d/config.yml \
+      -e PROC_DIRECTORY=/ua_proc \
+      -e FOLDER_ID=${var.folder_id} \
+      cr.yandex/yc/unified-agent
 EOF
     }
   }
