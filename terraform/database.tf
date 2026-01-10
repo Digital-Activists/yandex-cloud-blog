@@ -24,8 +24,8 @@ resource "yandex_compute_instance" "db" {
   }
 
   network_interface {
-    subnet_id = yandex_vpc_subnet.subnet-a.id
-    nat       = true // TODO: Убрать после завершения работы над проектом
+    subnet_id = yandex_vpc_subnet.db.id
+    nat = true
   }
 
   boot_disk {

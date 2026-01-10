@@ -19,7 +19,7 @@ variable "folder_id" {
 variable "zone" {
   description = "Zone"
   type        = string
-  default     = "ru-central1-a"
+  default     = "ru-central1-b"
 }
 
 variable "project_name" {

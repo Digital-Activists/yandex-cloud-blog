@@ -52,9 +52,7 @@ resource "yandex_compute_instance_group" "app_group" {
     yandex_resourcemanager_folder_iam_member.app_group_editor,
     yandex_resourcemanager_folder_iam_member.app_vm_cr_puller,
     yandex_resourcemanager_folder_iam_member.app_vm_storage_editor,
-    # yandex_vpc_subnet.subnet-a,
-    yandex_vpc_subnet.subnet-b
-    # yandex_vpc_subnet.subnet-d,
+    yandex_vpc_subnet.app
   ]
 
   allocation_policy {
@@ -102,13 +100,11 @@ resource "yandex_compute_instance_group" "app_group" {
     }
 
     network_interface {
-      network_id = yandex_vpc_network.network-1.id
+      network_id = yandex_vpc_network.net.id
       subnet_ids = [
-        # yandex_vpc_subnet.subnet-a.id,
-        yandex_vpc_subnet.subnet-b.id,
-        # yandex_vpc_subnet.subnet-d.id
+        yandex_vpc_subnet.app.id,
       ]
-      nat = true // TODO: Нужно для отладки, убрать потом
+      nat = true
     }
 
     resources {
